@@ -236,6 +236,45 @@ an array of the fixture classes that must be loaded before this one:
         }
     }
 
+Fixture Groups: Only Executing Some Fixtures
+--------------------------------------------
+
+By default, *all* of your fixture classes are executed. If you only want
+to execute *some* of your fixture classes, you can organize them into
+groups.
+
+The simplest way to organize a fixture class into a group is to
+make your fixture implement ``FixtureGroupInterface``::
+
+    // src/DataFixtures/UserFixtures.php
+
+    + use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
+
+    - class AppFixtures extends Fixture
+    + class UserFixtures extends Fixture implements FixtureGroupInterface
+    {
+        // ...
+
+    +     public static function getGroups()
+    +     {
+    +         return ['group1', 'group2'];
+    +     }
+    }
+
+To execute all of your fixtures for a given group, pass the ``--group``
+option:
+
+.. code-block:: bash
+
+    $ php bin/console doctrine:fixtures:load --group=group1
+
+    # or to execute multiple groups
+    $ php bin/console doctrine:fixtures:load --group=group1 --group=group2
+
+Alternatively, instead of implementing the ``FixtureGroupInterface``,
+you can also tag your service with ``doctrine.fixture.orm`` and add
+an extra ``group`` option set to a group your fixture should belong to.
+
 .. _`ORM`: http://symfony.com/doc/current/doctrine.html
 .. _`installation chapter`: https://getcomposer.org/doc/00-intro.md
 .. _`default service configuration`: https://symfony.com/doc/current/service_container.html#service-container-services-load-example
