@@ -9,6 +9,7 @@
 namespace Doctrine\Bundle\FixturesBundle\Loader;
 
 use Doctrine\Bundle\FixturesBundle\DependencyInjection\CompilerPass\FixturesCompilerPass;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\DataFixtures\Loader;
@@ -29,10 +30,15 @@ final class SymfonyFixturesLoader extends ContainerAwareLoader
     public function addFixtures(array $fixtures)
     {
         // Store all loaded fixtures so that we can resolve the dependencies correctly.
-        foreach ($fixtures as $fixture) {
-            $class = get_class($fixture['fixture']);
-            $this->loadedFixtures[$class] = $fixture['fixture'];
-            $this->addGroupsFixtureMapping($class, $fixture['groups']);
+        foreach ($fixtures as $fixtureData) {
+            $fixture = $fixtureData['fixture'];
+            $class = get_class($fixture);
+            $groups = $fixtureData['groups'];
+            if ($fixture instanceof FixtureGroupInterface) {
+                $groups = array_merge($groups, $fixture::getGroups());
+            }
+            $this->loadedFixtures[$class] = $fixture;
+            $this->addGroupsFixtureMapping($class, $groups);
         }
 
         // Now load all the fixtures
