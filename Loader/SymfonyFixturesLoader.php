@@ -29,9 +29,18 @@ final class SymfonyFixturesLoader extends ContainerAwareLoader
      */
     public function addFixtures(array $fixtures)
     {
+        // Because parent::addFixture may call $this->createFixture
+        // we cannot call $this->addFixture in this loop
         foreach ($fixtures as $fixtureData) {
             $fixture = $fixtureData['fixture'];
-            $this->addGroupsFixtureMapping(get_class($fixture), $fixtureData['groups']);
+            $class = get_class($fixture);
+            $this->addGroupsFixtureMapping($class, $fixtureData['groups']);
+            $this->loadedFixtures[$class] = $fixture;
+        }
+
+        // Now that all fixtures are in the $this->loadedFixtures array,
+        // it is safe to call $this->addFixture in this loop
+        foreach ($this->loadedFixtures as $fixture) {
             $this->addFixture($fixture);
         }
     }
