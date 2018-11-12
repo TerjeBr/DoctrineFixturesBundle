@@ -29,20 +29,9 @@ final class SymfonyFixturesLoader extends ContainerAwareLoader
      */
     public function addFixtures(array $fixtures)
     {
-        // Store all loaded fixtures so that we can resolve the dependencies correctly.
         foreach ($fixtures as $fixtureData) {
             $fixture = $fixtureData['fixture'];
-            $class = get_class($fixture);
-            $groups = $fixtureData['groups'];
-            if ($fixture instanceof FixtureGroupInterface) {
-                $groups = array_merge($groups, $fixture::getGroups());
-            }
-            $this->loadedFixtures[$class] = $fixture;
-            $this->addGroupsFixtureMapping($class, $groups);
-        }
-
-        // Now load all the fixtures
-        foreach ($this->loadedFixtures as $fixture) {
+            $this->addGroupsFixtureMapping(get_class($fixture), $fixtureData['groups']);
             $this->addFixture($fixture);
         }
     }
@@ -53,8 +42,10 @@ final class SymfonyFixturesLoader extends ContainerAwareLoader
     public function addFixture(FixtureInterface $fixture)
     {
         $class = get_class($fixture);
-        if (!isset($this->loadedFixtures[$class])) {
-            $this->loadedFixtures[$class] = $fixture;
+        $this->loadedFixtures[$class] = $fixture;
+
+        if ($fixture instanceof FixtureGroupInterface) {
+            $this->addGroupsFixtureMapping($class, $fixture::getGroups());
         }
 
         // see https://github.com/doctrine/data-fixtures/pull/274
