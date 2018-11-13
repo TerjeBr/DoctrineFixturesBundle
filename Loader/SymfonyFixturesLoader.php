@@ -33,8 +33,8 @@ final class SymfonyFixturesLoader extends ContainerAwareLoader
         // we cannot call $this->addFixture in this loop
         foreach ($fixtures as $fixture) {
             $class = get_class($fixture['fixture']);
-            $this->addGroupsFixtureMapping($class, $fixture['groups']);
             $this->loadedFixtures[$class] = $fixture['fixture'];
+            $this->addGroupsFixtureMapping($class, $fixture['groups']);
         }
 
         // Now that all fixtures are in the $this->loadedFixtures array,
